@@ -1,6 +1,5 @@
 package com.aadhya.adminartistry.presentation.edit
 
-
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
@@ -15,8 +14,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.aadhya.adminartistry.data.utils.Utils
 import com.aadhya.adminartistry.R
+import com.aadhya.adminartistry.data.utils.Utils
 import com.aadhya.adminartistry.databinding.ActivityEditPageBinding
 import com.bumptech.glide.Glide
 import com.google.firebase.database.DataSnapshot
@@ -24,36 +23,56 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import java.util.UUID
 
 class EditPage : AppCompatActivity() {
     private val GALLERY_REQUEST_CODE = 123
     private val PERMISSION_REQUEST_CODE = 456
     private lateinit var _binding: ActivityEditPageBinding
-    private var imgUri: String? = null
+    private var imgUri: Uri? = null
     private var timeStamp: String? = null
     private lateinit var database: FirebaseDatabase
     private lateinit var myRef: DatabaseReference
+    private lateinit var storageRef: StorageReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityEditPageBinding.inflate(layoutInflater)
         setContentView(_binding.root)
 
-        myRef = FirebaseDatabase.getInstance().reference.child("images")
-        imgUri = ""
+        database = FirebaseDatabase.getInstance()
+        myRef = database.reference.child("images")
+        storageRef = FirebaseStorage.getInstance().reference.child("images")
 
         _binding.btnUploadImage.setOnClickListener {
-            if (ContextCompat.checkSelfPermission(
-                    this , Manifest.permission.READ_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this ,
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE) ,
-                    PERMISSION_REQUEST_CODE
-                )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(
+                        this , Manifest.permission.READ_MEDIA_IMAGES
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this ,
+                        arrayOf(Manifest.permission.READ_MEDIA_IMAGES) ,
+                        PERMISSION_REQUEST_CODE
+                    )
+                } else {
+                    openGallery()
+                }
             } else {
-                openGallery()
+                if (ContextCompat.checkSelfPermission(
+                        this , Manifest.permission.READ_EXTERNAL_STORAGE
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this ,
+                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE) ,
+                        PERMISSION_REQUEST_CODE
+                    )
+                } else {
+                    openGallery()
+                }
             }
         }
 
@@ -64,12 +83,11 @@ class EditPage : AppCompatActivity() {
         val intent = intent
 
         val uriString: String? = intent.getStringExtra("image")
-
         if (uriString.isNullOrEmpty()) {
             _binding.imgView.setImageResource(R.drawable.ic_upload)
         } else {
             val imageUri: Uri = Uri.parse(uriString)
-            imgUri = uriString.toString()
+            imgUri = imageUri
             Glide.with(this).load(imageUri).into(_binding.imgView)
         }
 
@@ -93,37 +111,29 @@ class EditPage : AppCompatActivity() {
 
         _binding.btnEdit.setOnClickListener {
             name = _binding.edtName.text.toString()
-            firebaseDataUpdate(
-                imgUri , mainCategory , name , selectedItem = selectedItem.toString()
-            )
-        }
-
-        _binding.btnUploadImage.setOnClickListener {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
-                if (ContextCompat.checkSelfPermission(
-                        this , Manifest.permission.READ_MEDIA_IMAGES
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                        this ,
-                        arrayOf(Manifest.permission.READ_MEDIA_IMAGES) ,
-                        PERMISSION_REQUEST_CODE
-                    )
-                } else openGallery()
-            } else {
-                if (ContextCompat.checkSelfPermission(
-                        this , Manifest.permission.READ_EXTERNAL_STORAGE
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                        this ,
-                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE) ,
-                        PERMISSION_REQUEST_CODE
-                    )
-                } else {
-                    openGallery()
-                }
+            uploadImageToFirebase { downloadUrl ->
+                firebaseDataUpdate(
+                    downloadUrl , mainCategory , name , selectedItem
+                )
             }
+        }
+    }
+
+    private fun uploadImageToFirebase(callback: (String) -> Unit) {
+        imgUri?.let { uri ->
+            val fileName = UUID.randomUUID().toString()
+            val fileRef = storageRef.child("$fileName.jpg")
+            fileRef.putFile(uri).addOnSuccessListener {
+                fileRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                    callback(downloadUri.toString())
+                }.addOnFailureListener {
+                    Toast.makeText(this , "Failed to get download URL" , Toast.LENGTH_SHORT).show()
+                }
+            }.addOnFailureListener {
+                Toast.makeText(this , "Image upload failed" , Toast.LENGTH_SHORT).show()
+            }
+        } ?: run {
+            Toast.makeText(this , "No image selected" , Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -134,7 +144,6 @@ class EditPage : AppCompatActivity() {
         selectedItem: String? ,
     ) {
         if (imgUri != null && name.isNotEmpty()) {
-            println("DTATATA $selectedItem")
             updateData(imgUri , mainCategory , name , selectedItem)
         } else {
             Toast.makeText(this , "Please Fill Data." , Toast.LENGTH_SHORT).show()
@@ -153,7 +162,7 @@ class EditPage : AppCompatActivity() {
             "name" to name ,
             "subCategory" to selectedItem
         )
-
+        Log.d("IMAGERI" , imgUri)
         timeStamp?.let { timeStamp ->
             Log.d("EditPage" , "Querying with timestamp: $timeStamp")
 
@@ -197,7 +206,6 @@ class EditPage : AppCompatActivity() {
         } ?: run {
             Toast.makeText(this , "Timestamp is missing" , Toast.LENGTH_SHORT).show()
         }
-
     }
 
     private fun getAdapter(selectedItem: String) {
@@ -224,7 +232,7 @@ class EditPage : AppCompatActivity() {
             val selectedImageUri: Uri? = data?.data
             if (selectedImageUri != null) {
                 _binding.imgView.setImageURI(selectedImageUri)
-                imgUri = selectedImageUri.toString()
+                imgUri = selectedImageUri
             } else {
                 Toast.makeText(this , "Failed to get image" , Toast.LENGTH_SHORT).show()
             }
