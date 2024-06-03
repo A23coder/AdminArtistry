@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">AdminArtistry</string>
+    <string name="aadhya_artistry">Artistry Admin</string>
+    <string name="otp_verification">Otp Verification</string>
+    <string name="we_will_send_you_onetime_password_on_this_nummber">We will sed you One Time Password on this number</string>
+    <string name="enter_your_phone">Enter Your Phone</string>
+    <string name="get_otp">Get Otp</string>
 </resources>

@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "158381675854",
+    "firebase_url": "https://aaradhyaartistry-default-rtdb.firebaseio.com",
+    "project_id": "aaradhyaartistry",
+    "storage_bucket": "aaradhyaartistry.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:158381675854:android:b040678ee277ec1cb8fa1f",
+        "android_client_info": {
+          "package_name": "com.aadhya.aartistry"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPuddRab3SJUuL_LrLfvI5sor4DvRO7nM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:158381675854:android:0905a8626802f7b2b8fa1f",
+        "android_client_info": {
+          "package_name": "com.aadhya.adminartistry"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPuddRab3SJUuL_LrLfvI5sor4DvRO7nM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

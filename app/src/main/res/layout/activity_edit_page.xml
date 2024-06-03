@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".presentation.edit.EditPage">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutUpload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="@drawable/dotted_border"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imgView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_margin="10dp"
+            android:padding="10dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_upload"
+            app:layout_constraintBottom_toTopOf="@+id/btn_upload_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <Button
+            android:id="@+id/btn_upload_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/buttonrounded"
+            android:text="Choose Image"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:backgroundTint="#0EADFE"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/imgView"
+            app:layout_constraintStart_toStartOf="@+id/imgView"
+            app:layout_constraintTop_toBottomOf="@+id/imgView" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/txtmainCategory"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="20dp"
+        android:background="@drawable/roundedborder"
+        android:padding="10dp"
+        android:text="Category"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/layoutUpload"
+        app:layout_constraintStart_toStartOf="@+id/layoutUpload"
+        app:layout_constraintTop_toBottomOf="@+id/layoutUpload" />
+
+    <Spinner
+        android:id="@+id/txtsubCategory"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="20dp"
+        android:background="@drawable/roundedborder"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="@+id/txtmainCategory"
+        app:layout_constraintStart_toStartOf="@+id/txtmainCategory"
+        app:layout_constraintTop_toBottomOf="@+id/txtmainCategory" />
+
+
+    <EditText
+        android:id="@+id/edt_name"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="20dp"
+        android:background="@drawable/roundedborder"
+        android:hint="Enter Name"
+        android:maxLines="1"
+        android:padding="10dp"
+
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        app:layout_constraintEnd_toEndOf="@+id/txtsubCategory"
+        app:layout_constraintStart_toStartOf="@+id/txtsubCategory"
+        app:layout_constraintTop_toBottomOf="@+id/txtsubCategory" />
+
+    <Button
+        android:id="@+id/btnEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="@drawable/buttonrounded"
+        android:padding="10dp"
+        android:text="Edit/Update"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        app:backgroundTint="#304FFE"
+        app:layout_constraintEnd_toEndOf="@+id/edt_name"
+        app:layout_constraintStart_toStartOf="@+id/edt_name"
+        app:layout_constraintTop_toBottomOf="@+id/edt_name" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
