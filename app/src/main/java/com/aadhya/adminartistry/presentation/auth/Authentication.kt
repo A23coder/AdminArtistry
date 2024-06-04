@@ -20,6 +20,10 @@ class Authentication : AppCompatActivity() {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var _binding: ActivityAuthenticationBinding
     private lateinit var verificationId: String
+    private lateinit var number: String
+
+    private var isLogging: Boolean = false
+    private var userMobile: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +31,8 @@ class Authentication : AppCompatActivity() {
         setContentView(_binding.root)
         FirebaseApp.initializeApp(this)
 
+        userMobile = ""
+        number = ""
         mAuth = FirebaseAuth.getInstance()
 
         _binding.btnGetOtp.setOnClickListener {
@@ -34,10 +40,10 @@ class Authentication : AppCompatActivity() {
             if (_binding.idEdtPhoneNumber.text.isEmpty()) {
                 Toast.makeText(this , "Please enter a phone number.." , Toast.LENGTH_SHORT).show()
             } else {
-                val number = "+91${_binding.idEdtPhoneNumber.text}"
+                number = "+91${_binding.idEdtPhoneNumber.text}"
                 println("Number is $number")
 
-                if (number == "+919081069042" || number == "+917573838402") {
+                if (number == "+919081069042" || number == "+917573838402" || number=="+919274929291") {
                     _binding.layoutEnterOtp.visibility = View.GONE
                     _binding.layoutSetOtp.visibility = View.VISIBLE
                     sendCode(number)
@@ -69,12 +75,8 @@ class Authentication : AppCompatActivity() {
     }
 
     private fun sendVerificationCode(phone: String) {
-        val options = PhoneAuthOptions.newBuilder(mAuth)
-            .setPhoneNumber(phone)
-            .setTimeout(120L , TimeUnit.SECONDS)
-            .setActivity(this)
-            .setCallbacks(mCallback)
-            .build()
+        val options = PhoneAuthOptions.newBuilder(mAuth).setPhoneNumber(phone)
+            .setTimeout(120L , TimeUnit.SECONDS).setActivity(this).setCallbacks(mCallback).build()
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
@@ -90,7 +92,7 @@ class Authentication : AppCompatActivity() {
         override fun onVerificationCompleted(credential: PhoneAuthCredential) {
             val code = credential.smsCode
             if (code != null) {
-                _binding.idEdtPhoneNumber.setText(code)
+                _binding.otpTake.otpEditText?.setText(code)
                 verifyCode(code)
             }
         }
@@ -103,13 +105,45 @@ class Authentication : AppCompatActivity() {
     private fun signInWithCredential(credential: PhoneAuthCredential) {
         mAuth.signInWithCredential(credential).addOnCompleteListener { task ->
             if (task.isSuccessful) {
+                userMobile = number
+                isLogging = true
+
+                val sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE)
+                val myEdit = sharedPreferences.edit()
+                myEdit.putString("userMobile", userMobile)
+                myEdit.putBoolean("isLogging", isLogging)
+                myEdit.apply()
+
                 val intent = Intent(this@Authentication , Admin::class.java)
                 startActivity(intent)
                 finish()
             } else {
-                Toast.makeText(this , task.exception?.message.toString() , Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(this , "Invalid OTP. Please try again." , Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val sh = getSharedPreferences("MySharedPref", MODE_PRIVATE)
+        userMobile = sh.getString("userMobile", "")
+        val isLoggedIn = sh.getBoolean("isLogging", false)
+
+        if (isLoggedIn) {
+            val intent = Intent(this@Authentication, Admin::class.java)
+            startActivity(intent)
+            finish()
+        } else {
+            Toast.makeText(this , "Enter Otp for accessing Admin App.." , Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE)
+        val myEdit = sharedPreferences.edit()
+        myEdit.putString("userMobile", userMobile)
+        myEdit.putBoolean("isLogging", isLogging)
+        myEdit.apply()
     }
 }
