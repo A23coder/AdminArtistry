@@ -45,11 +45,5 @@ class Utils {
             "Hanging  mehndi design" ,
             "Backhand Simple mehndi design" ,
         )
-        val data_list = listOf(
-            HomeData(R.drawable.newbg , "Mehandi Design") ,
-            HomeData(R.drawable.nailart , "NailArt Design") ,
-            HomeData(R.drawable.hairstyle , "HairStyle Design") ,
-            HomeData(R.drawable.makeup , "Makeup Design") ,
-        )
     }
 }

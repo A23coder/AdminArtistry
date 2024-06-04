@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:elevation="0.2dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/logo" />
+         />
 
     <ImageView
         android:id="@+id/ic_video"
@@ -22,7 +22,7 @@
         android:layout_gravity="center|end|top"
         android:layout_margin="10dp"
         android:elevation="10dp"
-        android:src="@drawable/ic_video"
+
         android:visibility="gone"
         app:tint="#80000000" />
 

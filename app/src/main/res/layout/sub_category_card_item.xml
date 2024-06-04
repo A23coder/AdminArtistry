@@ -24,7 +24,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="130dp"
                 android:scaleType="fitXY"
-                android:src="@drawable/logo"
                 app:layout_constraintBottom_toTopOf="@+id/sub_cat_txt"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
