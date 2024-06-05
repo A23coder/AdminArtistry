@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -36,12 +37,14 @@ class EditPage : AppCompatActivity() {
     private lateinit var database: FirebaseDatabase
     private lateinit var myRef: DatabaseReference
     private lateinit var storageRef: StorageReference
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityEditPageBinding.inflate(layoutInflater)
         setContentView(_binding.root)
 
+        progressBar = _binding.progressBar
         database = FirebaseDatabase.getInstance()
         myRef = database.reference.child("images")
         storageRef = FirebaseStorage.getInstance().reference.child("images")
@@ -121,15 +124,19 @@ class EditPage : AppCompatActivity() {
 
     private fun uploadImageToFirebase(callback: (String) -> Unit) {
         imgUri?.let { uri ->
+            progressBar.visibility = View.VISIBLE
             val fileName = UUID.randomUUID().toString()
             val fileRef = storageRef.child("$fileName.jpg")
             fileRef.putFile(uri).addOnSuccessListener {
                 fileRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                    progressBar.visibility = View.GONE
                     callback(downloadUri.toString())
                 }.addOnFailureListener {
+                    progressBar.visibility = View.GONE
                     Toast.makeText(this , "Failed to get download URL" , Toast.LENGTH_SHORT).show()
                 }
             }.addOnFailureListener {
+                progressBar.visibility = View.GONE
                 Toast.makeText(this , "Image upload failed" , Toast.LENGTH_SHORT).show()
             }
         } ?: run {
@@ -163,6 +170,7 @@ class EditPage : AppCompatActivity() {
             "subCategory" to selectedItem
         )
         Log.d("IMAGERI" , imgUri)
+        progressBar.visibility = View.VISIBLE
         timeStamp?.let { timeStamp ->
             Log.d("EditPage" , "Querying with timestamp: $timeStamp")
 
@@ -173,6 +181,7 @@ class EditPage : AppCompatActivity() {
                             for (dataSnapshot in snapshot.children) {
                                 Log.d("EditPage" , "Found matching record: ${dataSnapshot.key}")
                                 dataSnapshot.ref.updateChildren(data).addOnSuccessListener {
+                                    progressBar.visibility = View.GONE
                                     Toast.makeText(
                                         this@EditPage ,
                                         "Document updated successfully" ,
@@ -180,6 +189,7 @@ class EditPage : AppCompatActivity() {
                                     ).show()
                                     Log.d("DATAATATAT" , data.toString())
                                 }.addOnFailureListener { e ->
+                                    progressBar.visibility = View.GONE
                                     Toast.makeText(
                                         this@EditPage ,
                                         "Error updating document: ${e.message}" ,
@@ -188,6 +198,7 @@ class EditPage : AppCompatActivity() {
                                 }
                             }
                         } else {
+                            progressBar.visibility = View.GONE
                             Log.d(
                                 "EditPage" , "No record found with the given timestamp: $timeStamp"
                             )
@@ -200,10 +211,12 @@ class EditPage : AppCompatActivity() {
                     }
 
                     override fun onCancelled(error: DatabaseError) {
+                        progressBar.visibility = View.GONE
                         Log.d("EditPage" , error.message)
                     }
                 })
         } ?: run {
+            progressBar.visibility = View.GONE
             Toast.makeText(this , "Timestamp is missing" , Toast.LENGTH_SHORT).show()
         }
     }

@@ -78,7 +78,7 @@
             android:padding="12dp"
             android:text="@string/get_otp"
             android:textAllCaps="true"
-            app:backgroundTint="#304FFE"
+            app:backgroundTint="@color/blue"
             app:layout_constraintEnd_toEndOf="@+id/idEdtPhoneNumber"
             app:layout_constraintStart_toStartOf="@+id/idEdtPhoneNumber"
             app:layout_constraintTop_toBottomOf="@+id/idEdtPhoneNumber" />
@@ -169,11 +169,21 @@
             android:padding="12dp"
             android:text="Verify"
             android:textAllCaps="true"
-            app:backgroundTint="#304FFE"
+            app:backgroundTint="@color/blue"
             app:layout_constraintEnd_toEndOf="@+id/otp_take"
             app:layout_constraintStart_toStartOf="@+id/otp_take"
             app:layout_constraintTop_toBottomOf="@+id/otp_take" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <ProgressBar
+        android:id="@+id/progressBarForAuth"
+        android:layout_width="50dp"
+        android:layout_height="40dp"
+        android:layout_margin="10dp"
+        android:indeterminateTint="@color/blue"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/layout_set_otp"
+        app:layout_constraintStart_toStartOf="@+id/layout_set_otp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

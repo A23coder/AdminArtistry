@@ -103,5 +103,14 @@
         app:layout_constraintStart_toStartOf="@+id/edt_name"
         app:layout_constraintTop_toBottomOf="@+id/edt_name" />
 
-
+    <ProgressBar
+        android:id="@+id/progressBarAddData"
+        android:layout_width="50dp"
+        android:layout_height="40dp"
+        android:layout_margin="10dp"
+        android:indeterminateTint="@color/blue"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/btnUpload"
+        app:layout_constraintStart_toStartOf="@+id/btnUpload" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,11 +1,13 @@
 package com.aadhya.adminartistry.presentation.auth
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import com.aadhya.adminartistry.databinding.ActivityAuthenticationBinding
 import com.aadhya.adminartistry.presentation.admin.Admin
 import com.google.firebase.FirebaseApp
@@ -30,20 +32,27 @@ class Authentication : AppCompatActivity() {
         _binding = ActivityAuthenticationBinding.inflate(layoutInflater)
         setContentView(_binding.root)
         FirebaseApp.initializeApp(this)
+//        FirebaseAuth.getInstance().firebaseAuthSettings.setAppVerificationDisabledForTesting(true)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         userMobile = ""
         number = ""
+        verificationId = "123789"
         mAuth = FirebaseAuth.getInstance()
 
         _binding.btnGetOtp.setOnClickListener {
-
             if (_binding.idEdtPhoneNumber.text.isEmpty()) {
                 Toast.makeText(this , "Please enter a phone number.." , Toast.LENGTH_SHORT).show()
             } else {
                 number = "+91${_binding.idEdtPhoneNumber.text}"
                 println("Number is $number")
-
-                if (number == "+919081069042" || number == "+917573838402" || number=="+919274929291") {
+//                if (number == "+911234567899" || number == "+919081069042" || number == "+917573838402" || number == "+919274929291") {
+//                    _binding.layoutEnterOtp.visibility = View.GONE
+//                    _binding.layoutSetOtp.visibility = View.VISIBLE
+//                    sendCode(number)
+//                    Toast.makeText(this , "Otp sent Successfully.." , Toast.LENGTH_SHORT).show()
+//                }
+                if (number.isNotEmpty()) {
                     _binding.layoutEnterOtp.visibility = View.GONE
                     _binding.layoutSetOtp.visibility = View.VISIBLE
                     sendCode(number)
@@ -107,13 +116,16 @@ class Authentication : AppCompatActivity() {
             if (task.isSuccessful) {
                 userMobile = number
                 isLogging = true
-
-                val sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE)
+                _binding.progressBarForAuth.visibility = View.VISIBLE
+                val sharedPreferences = getSharedPreferences("MySharedPref" , MODE_PRIVATE)
                 val myEdit = sharedPreferences.edit()
-                myEdit.putString("userMobile", userMobile)
-                myEdit.putBoolean("isLogging", isLogging)
-                myEdit.apply()
+                myEdit.putString("userMobile" , userMobile)
+                myEdit.putBoolean("isLogging" , isLogging)
+                print("##CHECK$isLogging")
 
+                myEdit.apply()
+                Toast.makeText(this , "Welcome you Aadhya Artistry Admin" , Toast.LENGTH_SHORT)
+                    .show()
                 val intent = Intent(this@Authentication , Admin::class.java)
                 startActivity(intent)
                 finish()
@@ -123,27 +135,21 @@ class Authentication : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("WrongConstant")
     override fun onResume() {
         super.onResume()
-        val sh = getSharedPreferences("MySharedPref", MODE_PRIVATE)
-        userMobile = sh.getString("userMobile", "")
-        val isLoggedIn = sh.getBoolean("isLogging", false)
+        val sh = getSharedPreferences("MySharedPref" , MODE_APPEND)
+        userMobile = sh.getString("userMobile" , "")
+        var isLoggedIn = sh.getBoolean("isLogging" , false)
+        print("##CHECK2$isLoggedIn")
 
         if (isLoggedIn) {
-            val intent = Intent(this@Authentication, Admin::class.java)
+            Toast.makeText(this , "Welcome to Aadhya Artistry.." , Toast.LENGTH_SHORT).show()
+            val intent = Intent(this@Authentication , Admin::class.java)
             startActivity(intent)
             finish()
         } else {
             Toast.makeText(this , "Enter Otp for accessing Admin App.." , Toast.LENGTH_SHORT).show()
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        val sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE)
-        val myEdit = sharedPreferences.edit()
-        myEdit.putString("userMobile", userMobile)
-        myEdit.putBoolean("isLogging", isLogging)
-        myEdit.apply()
     }
 }

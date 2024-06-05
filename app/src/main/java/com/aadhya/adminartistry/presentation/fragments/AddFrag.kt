@@ -17,8 +17,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import com.aadhya.adminartistry.data.utils.Utils
 import com.aadhya.adminartistry.R
+import com.aadhya.adminartistry.data.utils.Utils
 import com.aadhya.adminartistry.databinding.LayoutAddFragmentBinding
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -96,8 +96,7 @@ class AddFrag : Fragment() {
         binding.btnAddImage.setOnClickListener {
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
                 if (ContextCompat.checkSelfPermission(
-                        requireContext() ,
-                        Manifest.permission.READ_MEDIA_IMAGES
+                        requireContext() , Manifest.permission.READ_MEDIA_IMAGES
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     ActivityCompat.requestPermissions(
@@ -105,12 +104,10 @@ class AddFrag : Fragment() {
                         arrayOf(Manifest.permission.READ_MEDIA_IMAGES) ,
                         PERMISSION_REQUEST_CODE
                     )
-                } else
-                    openGallery()
+                } else openGallery()
             } else {
                 if (ContextCompat.checkSelfPermission(
-                        requireContext() ,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
+                        requireContext() , Manifest.permission.READ_EXTERNAL_STORAGE
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     ActivityCompat.requestPermissions(
@@ -127,14 +124,11 @@ class AddFrag : Fragment() {
 
     private fun checkPermissionAndOpenGallery(permission: String) {
         if (ContextCompat.checkSelfPermission(
-                requireContext() ,
-                permission
+                requireContext() , permission
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                requireActivity() ,
-                arrayOf(permission) ,
-                PERMISSION_REQUEST_CODE
+                requireActivity() , arrayOf(permission) , PERMISSION_REQUEST_CODE
             )
         } else {
             openGallery()
@@ -172,9 +166,7 @@ class AddFrag : Fragment() {
 
             selectedCategory == "Mehandi Design" && selectedSubCategory.isEmpty() -> {
                 Toast.makeText(
-                    requireContext() ,
-                    "Please select a subcategory" ,
-                    Toast.LENGTH_SHORT
+                    requireContext() , "Please select a subcategory" , Toast.LENGTH_SHORT
                 ).show()
                 false
             }
@@ -210,7 +202,7 @@ class AddFrag : Fragment() {
     private fun uploadImageToFirebaseStorage(imgUri: String) {
         val storageReference = FirebaseStorage.getInstance().reference
         val imageRef = storageReference.child("images/${UUID.randomUUID()}.jpg")
-
+        binding.progressBarAddData.visibility = View.VISIBLE
         imageRef.putFile(imgUri.toUri()).addOnSuccessListener { taskSnapshot ->
             imageRef.downloadUrl.addOnSuccessListener { uri ->
                 val downloadUrl = uri.toString()
@@ -218,9 +210,7 @@ class AddFrag : Fragment() {
             }
         }.addOnFailureListener { exception ->
             Toast.makeText(
-                requireContext() ,
-                "Upload failed: ${exception.message}" ,
-                Toast.LENGTH_SHORT
+                requireContext() , "Upload failed: ${exception.message}" , Toast.LENGTH_SHORT
             ).show()
         }
     }
@@ -238,6 +228,7 @@ class AddFrag : Fragment() {
         mDatabaseReference.child("images").push().setValue(imageDetails).addOnSuccessListener {
             Toast.makeText(requireContext() , "Your data has been uploaded" , Toast.LENGTH_SHORT)
                 .show()
+            binding.progressBarAddData.visibility = View.GONE
             clearForm()
         }.addOnFailureListener { exception ->
             Toast.makeText(

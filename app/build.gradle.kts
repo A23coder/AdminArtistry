@@ -53,8 +53,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.github.appsfeature:otp-view:1.1")
 
-    implementation("com.github.appsfeature:otp-view:1.1")
-
 //    implementation("com.google.firebase:firebase-auth:23.0.0")
     implementation("com.google.firebase:firebase-database:21.0.0")
 //    implementation("com.google.firebase:firebase-bom:32.1.1")
