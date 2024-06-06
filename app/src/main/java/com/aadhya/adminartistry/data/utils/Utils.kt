@@ -28,6 +28,7 @@ class Utils {
             "Portrait Mehndi Design" ,
             "Hanging Mehndi Design" ,
             "Backhand Simple Mehndi Design" ,
+            "BabyShower Mehndi Design" ,
         )
 
         val actualCategory = listOf(
