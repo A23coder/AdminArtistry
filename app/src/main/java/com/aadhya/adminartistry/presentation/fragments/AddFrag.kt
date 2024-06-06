@@ -13,8 +13,9 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.aadhya.adminartistry.R
@@ -56,7 +57,9 @@ class AddFrag : Fragment() {
 
     private fun setupSpinnerAdapters() {
         val mainCateAdapter = ArrayAdapter(
-            requireContext() , android.R.layout.simple_spinner_dropdown_item , Utils.mainCategory
+            requireContext() ,
+            android.R.layout.simple_spinner_dropdown_item ,
+            Utils.mainCategory
         )
         binding.mainCategory.adapter = mainCateAdapter
         binding.mainCategory.isEnabled = true
@@ -66,7 +69,10 @@ class AddFrag : Fragment() {
     private fun initListeners() {
         binding.mainCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
-                parent: AdapterView<*> , view: View? , position: Int , id: Long ,
+                parent: AdapterView<*> ,
+                view: View? ,
+                position: Int ,
+                id: Long ,
             ) {
                 val selectedItem = parent.getItemAtPosition(position).toString()
                 selectedCategory = if (selectedItem == "Select Category") "" else selectedItem
@@ -78,7 +84,10 @@ class AddFrag : Fragment() {
 
         binding.subCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
-                parent: AdapterView<*> , view: View? , position: Int , id: Long ,
+                parent: AdapterView<*> ,
+                view: View? ,
+                position: Int ,
+                id: Long ,
             ) {
                 val selectedItem = parent.getItemAtPosition(position).toString()
                 selectedSubCategory = if (selectedItem == "Select Subcategory") "" else selectedItem
@@ -94,51 +103,55 @@ class AddFrag : Fragment() {
         }
 
         binding.btnAddImage.setOnClickListener {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
-                if (ContextCompat.checkSelfPermission(
-                        requireContext() , Manifest.permission.READ_MEDIA_IMAGES
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                        requireActivity() ,
-                        arrayOf(Manifest.permission.READ_MEDIA_IMAGES) ,
-                        PERMISSION_REQUEST_CODE
-                    )
-                } else openGallery()
-            } else {
-                if (ContextCompat.checkSelfPermission(
-                        requireContext() , Manifest.permission.READ_EXTERNAL_STORAGE
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                        requireActivity() ,
-                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE) ,
-                        PERMISSION_REQUEST_CODE
-                    )
-                } else {
-                    openGallery()
-                }
+            checkPermissionAndOpenGallery()
+        }
+    }
+
+    private fun checkPermissionAndOpenGallery() {
+        val permission = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext() ,
+                permission
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                openGallery()
+            }
+
+            shouldShowRequestPermissionRationale(permission) -> {
+                Toast.makeText(
+                    requireContext() ,
+                    "Permission needed to access gallery" ,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            else -> {
+                requestPermissionLauncher.launch(permission)
             }
         }
     }
 
-    private fun checkPermissionAndOpenGallery(permission: String) {
-        if (ContextCompat.checkSelfPermission(
-                requireContext() , permission
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                requireActivity() , arrayOf(permission) , PERMISSION_REQUEST_CODE
-            )
-        } else {
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
             openGallery()
+        } else {
+            Toast.makeText(requireContext() , "Permission denied" , Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun updateSubCategorySpinner() {
         if (selectedCategory == "Mehandi Design") {
             val subCateAdapter = ArrayAdapter(
-                requireContext() , android.R.layout.simple_spinner_dropdown_item , Utils.subCategory
+                requireContext() ,
+                android.R.layout.simple_spinner_dropdown_item ,
+                Utils.subCategory
             )
             binding.subCategory.adapter = subCateAdapter
             binding.subCategory.visibility = View.VISIBLE
@@ -151,6 +164,7 @@ class AddFrag : Fragment() {
     }
 
     private fun isFormValid(): Boolean {
+        checkImage()
         return when {
             binding.imgAddView.drawable == null -> {
                 Toast.makeText(requireContext() , "Please choose an image" , Toast.LENGTH_SHORT)
@@ -166,7 +180,9 @@ class AddFrag : Fragment() {
 
             selectedCategory == "Mehandi Design" && selectedSubCategory.isEmpty() -> {
                 Toast.makeText(
-                    requireContext() , "Please select a subcategory" , Toast.LENGTH_SHORT
+                    requireContext() ,
+                    "Please select a subcategory" ,
+                    Toast.LENGTH_SHORT
                 ).show()
                 false
             }
@@ -188,7 +204,6 @@ class AddFrag : Fragment() {
         startActivityForResult(intent , GALLERY_REQUEST_CODE)
     }
 
-    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int , resultCode: Int , data: Intent?) {
         super.onActivityResult(requestCode , resultCode , data)
         if (resultCode == Activity.RESULT_OK && requestCode == GALLERY_REQUEST_CODE) {
@@ -203,15 +218,19 @@ class AddFrag : Fragment() {
         val storageReference = FirebaseStorage.getInstance().reference
         val imageRef = storageReference.child("images/${UUID.randomUUID()}.jpg")
         binding.progressBarAddData.visibility = View.VISIBLE
-        imageRef.putFile(imgUri.toUri()).addOnSuccessListener { taskSnapshot ->
+        imageRef.putFile(imgUri.toUri()).addOnSuccessListener {
             imageRef.downloadUrl.addOnSuccessListener { uri ->
                 val downloadUrl = uri.toString()
                 saveImageDetailsToDatabase(downloadUrl)
             }
         }.addOnFailureListener { exception ->
             Toast.makeText(
-                requireContext() , "Upload failed: ${exception.message}" , Toast.LENGTH_SHORT
+                requireContext() ,
+                "Upload failed: ${exception.message}" ,
+                Toast.LENGTH_SHORT
             ).show()
+        }.addOnCompleteListener {
+            binding.progressBarAddData.visibility = View.GONE
         }
     }
 
@@ -228,7 +247,6 @@ class AddFrag : Fragment() {
         mDatabaseReference.child("images").push().setValue(imageDetails).addOnSuccessListener {
             Toast.makeText(requireContext() , "Your data has been uploaded" , Toast.LENGTH_SHORT)
                 .show()
-            binding.progressBarAddData.visibility = View.GONE
             clearForm()
         }.addOnFailureListener { exception ->
             Toast.makeText(
@@ -250,18 +268,15 @@ class AddFrag : Fragment() {
         imgUri = ""
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int ,
-        permissions: Array<out String> ,
-        grantResults: IntArray ,
-    ) {
-        super.onRequestPermissionsResult(requestCode , permissions , grantResults)
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openGallery()
-            } else {
-                Toast.makeText(requireContext() , "Permission denied" , Toast.LENGTH_SHORT).show()
+    private fun checkImage() {
+        val expectedDrawable = ContextCompat.getDrawable(requireContext() , R.drawable.ic_upload)
+        val currentDrawable = binding.imgAddView.drawable
+
+        if (expectedDrawable != null && currentDrawable != null) {
+            val bitmap1 = expectedDrawable.toBitmap()
+            val bitmap2 = currentDrawable.toBitmap()
+            if (bitmap1.sameAs(bitmap2)) {
+                Toast.makeText(requireContext() , "Choose Image" , Toast.LENGTH_SHORT).show()
             }
         }
     }
