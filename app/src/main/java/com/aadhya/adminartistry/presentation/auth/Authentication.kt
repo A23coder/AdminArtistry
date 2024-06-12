@@ -37,7 +37,7 @@ class Authentication : AppCompatActivity() {
 
         userMobile = ""
         number = ""
-        verificationId = "123789"
+        verificationId = ""
         mAuth = FirebaseAuth.getInstance()
 
         _binding.btnGetOtp.setOnClickListener {
@@ -46,18 +46,19 @@ class Authentication : AppCompatActivity() {
             } else {
                 number = "+91${_binding.idEdtPhoneNumber.text}"
                 println("Number is $number")
-//                if (number == "+911234567899" || number == "+919081069042" || number == "+917573838402" || number == "+919274929291") {
+                if (number == "+911234567899" || number == "+919081069042" || number == "+917573838402" || number == "+919274929291") {
+                    _binding.layoutEnterOtp.visibility = View.GONE
+                    _binding.layoutSetOtp.visibility = View.VISIBLE
+                    sendCode(number)
+                    Toast.makeText(this , "Otp sent Successfully.." , Toast.LENGTH_SHORT).show()
+                }
+//                if (number.isNotEmpty()) {
 //                    _binding.layoutEnterOtp.visibility = View.GONE
 //                    _binding.layoutSetOtp.visibility = View.VISIBLE
 //                    sendCode(number)
 //                    Toast.makeText(this , "Otp sent Successfully.." , Toast.LENGTH_SHORT).show()
 //                }
-                if (number.isNotEmpty()) {
-                    _binding.layoutEnterOtp.visibility = View.GONE
-                    _binding.layoutSetOtp.visibility = View.VISIBLE
-                    sendCode(number)
-                    Toast.makeText(this , "Otp sent Successfully.." , Toast.LENGTH_SHORT).show()
-                } else {
+                else {
                     Toast.makeText(this , "You are not Admin.." , Toast.LENGTH_SHORT).show()
                 }
             }
